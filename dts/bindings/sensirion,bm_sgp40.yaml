@@ -1,0 +1,22 @@
+#
+# Copyright (c) 2021, Leonard Pollak
+#
+# SPDX-License-Identifier: Apache-2.0
+
+description: Sensirion SGP40 Multipixel Gas Sensor
+
+compatible: "sensirion,bm_sgp40"
+
+include: [sensor-device.yaml, i2c-device.yaml]
+
+
+properties:
+  temperature:
+    type: uint8-array
+    default: [0x66, 0x66, 0x93] #25 degrees + CRC
+    description: Temperature compensation. 
+
+  relative-humidity:
+    type: uint8-array
+    default: [0x80, 0x00, 0xa2] #50 % + CRC
+    description: Humidity compensation.

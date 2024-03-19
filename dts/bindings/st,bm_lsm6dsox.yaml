@@ -1,0 +1,12 @@
+# Copyright (c) 2019 STMicroelectronics
+# SPDX-License-Identifier: Apache-2.0
+
+# Found in zephyr\dts\bindings\sensor\st,lsm6dso-i2c.yaml and zephyr\dts\bindings\sensor\st,lsm6dso32-i2c.yaml
+
+description: |
+    STMicroelectronics LSM6DSO 6-axis IMU (Inertial Measurement Unit) sensor
+    accessed through I2C bus
+
+compatible: "st,bm_lsm6dsox"
+
+include: ["i2c-device.yaml", "st,lsm6dso-common.yaml"]

@@ -1,0 +1,232 @@
+/*
+ * Copyright (c) 2020 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+ / {
+	chosen {
+		zephyr,entropy = &rng;
+	};
+
+	encoder_left: encoder_left {
+		compatible = "bm_hw_encoder_counter";
+		status = "okay";
+		gpios = <&gpio0 26 GPIO_ACTIVE_LOW>;
+		timer_address = < 0x40009000 >;
+		timer_id = < 1 >;
+	};
+
+	encoder_right: encoder_right {
+		compatible = "bm_hw_encoder_counter";
+		status = "okay";
+		gpios = <&gpio0 27 GPIO_ACTIVE_LOW>;
+		timer_address = < 0x4000a000 >;
+		timer_id = < 2 >;
+	};
+
+	motor_node_label: motor_node {
+		compatible = "bm_motor_driver";
+		status = "okay";
+		stby-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+
+		left_wheel_label: left_wheel {
+			compatible = "bm_wheel_driver";
+			status = "okay";
+			xi1-gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+			xi2-gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
+			pwms = <&pwm1 1 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+		};
+
+		right_wheel_label: right_wheel {
+			compatible = "bm_wheel_driver";
+			status = "okay";
+			xi1-gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
+			xi2-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+			pwms = <&pwm0 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+		};
+	};
+};
+
+&pinctrl {
+	bm_i2c1_default: bm_i2c1_default {
+		group1 {
+			psels = <NRF_PSEL(TWIM_SDA, 0, 30)>,
+				<NRF_PSEL(TWIM_SCL, 0, 31)>;
+		};
+	};	
+
+	bm_i2c1_sleep: bm_i2c1_sleep {
+		group1 {
+			psels = <NRF_PSEL(TWIM_SDA, 0, 30)>,
+				<NRF_PSEL(TWIM_SCL, 0, 31)>;
+			low-power-enable;
+		};
+	};	
+	spi3_default: spi3_default {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 1, 15)>, 
+				<NRF_PSEL(SPIM_MOSI, 1, 14)>,
+				<NRF_PSEL(SPIM_MISO, 1, 8)>;
+		};
+	};
+
+	spi3_sleep: spi3_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 1, 15)>,
+				<NRF_PSEL(SPIM_MOSI, 1, 14)>,
+				<NRF_PSEL(SPIM_MISO, 1, 8)>;
+			low-power-enable;
+		};
+	};
+
+	pwm0_default_alt: pwm0_default_alt {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT0, 1, 1)>;
+		};
+	};
+
+	pwm0_sleep_alt: pwm0_sleep_alt {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT0, 1, 1)>;
+		};
+	};
+
+	pwm1_default_alt: pwm1_default_alt {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT1, 1, 7)>;
+		};
+	};
+
+	pwm1_sleep_alt: pwm1_sleep_alt {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT1, 1, 7)>;
+		};
+	};
+};
+
+&gpiote {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&adc {
+	status = "disabled";
+};
+
+&i2c0 {
+	status = "disabled";
+};
+&spi0 {
+	status = "disabled";
+};
+&spi1 {
+	status = "disabled";
+};
+&spi2 {
+	status = "disabled";
+};
+&qspi {
+	status = "disabled";
+};
+
+&pwm_led0 {
+	status = "disabled";
+};
+&arduino_header {
+	status = "disabled";
+};
+&arduino_adc {
+	status = "disabled";
+};
+&arduino_i2c {
+	status = "disabled";
+};
+&arduino_serial {
+	status = "disabled";
+};
+&arduino_spi {
+	status = "disabled";
+};
+&ieee802154 {
+	status = "disabled";
+};
+
+pwm_a: &pwm0 {
+	status = "okay";
+	compatible = "nordic,nrf-pwm";
+	pinctrl-0 = <&pwm0_default_alt>;
+	pinctrl-1 = <&pwm0_sleep_alt>;
+	pinctrl-names = "default", "sleep";
+};
+
+pwm_b: &pwm1 {
+	status = "okay";
+	compatible = "nordic,nrf-pwm";
+	pinctrl-0 = <&pwm1_default_alt>;
+	pinctrl-1 = <&pwm1_sleep_alt>;
+	pinctrl-names = "default", "sleep";
+};
+
+&i2c1 {
+	status = "okay";
+    pinctrl-0 = <&bm_i2c1_default>;
+    pinctrl-1 = <&bm_i2c1_sleep>;
+    pinctrl-names = "default", "sleep";
+	bm_lsm6dsox: bm_lsm6dsox@6a {
+		compatible = "st,bm_lsm6dsox";
+		status = "okay";
+		reg = <0x6a>; //i2c slave address, if SDO/SA0 (less significant bit of the device address) is connected to power supply: 0x6b, if connected to ground: 0x6a
+	};
+	bm_sgp40: bm_sgp40@59 {
+		compatible = "sensirion,bm_sgp40";
+		status = "okay";
+		reg = <0x59>; //i2c slave address,
+		temperature = [66 66 93];
+		relative-humidity = [80 00 a2];
+	};
+};
+
+&spi3 {
+	status = "okay";
+	compatible = "nordic,nrf-spim";
+	pinctrl-0 = <&spi3_default>;
+	pinctrl-1 = <&spi3_sleep>;
+	pinctrl-names = "default", "sleep";
+	cs-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>; 
+	bm_st7735:bm_st7735@0{ 
+		compatible = "sitronix,bm_st7735";
+		status = "okay";
+		reset-gpios = <&gpio1 11 GPIO_ACTIVE_LOW>;
+		cmd-data-gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>; 
+		spi-max-frequency = <2000000>; 
+		reg = <0>; 
+		duplex = <0>; // Set duplex. Does not support half-duplex.
+		width = <128>; 
+		height = <128>; 
+		x-offset = < 0 >;
+		y-offset = < 0 >;
+		madctl = <0x08>; // Specify RGB and not BGR setting. 
+		colmod = <0x06>; // Set pixel format 18bit. 
+		vmctr1 = <0x04>;
+		pwctr1 = [82 02 84];
+		pwctr2 = [c5];
+		pwctr3 = [0a 00];
+		pwctr4 = [8a 2e];
+		pwctr5 = [8a aa];
+		frmctr1 = [01 2c 2d];
+		frmctr2 = [01 2c 2d];
+		frmctr3 = [01 2c 2d 01 2c 2d];
+		caset = [00 00 00 80];
+		raset = [00 00 00 80];
+		gmctrp1 = [02 1c 07 12 37 32 29 2d 29 25 2b 39 00 01 03 10]; // Copied from example, found no default.
+		gmctrn1 = [03 1d 07 06 2e 2c 29 2d 2e 2e 37 3f 00 00 02 10]; // Copied from example. 
+	};
+};

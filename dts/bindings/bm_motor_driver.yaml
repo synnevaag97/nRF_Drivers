@@ -1,0 +1,11 @@
+description: Motor driver gpio
+
+compatible: "bm_motor_driver"
+
+include: base.yaml
+
+properties:
+    stby-gpios:
+      required: true
+      type: phandle-array
+      description: Driver specific pin
